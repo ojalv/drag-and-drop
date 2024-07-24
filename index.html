@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drag and Drop con Información Dinámica</title>
+    <style>
+        #playground {
+            display: flex;
+            justify-content: space-evenly;
+        }
+
+        #explanation {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #explanation ol {
+            padding-right: 40px;
+
+        }
+
+        #contenedor {
+            width: 400px;
+            height: 400px;
+            border: 2px dashed #aaa;
+            position: relative;
+            margin-top: 20px;
+        }
+
+        .drag {
+            width: 100px;
+            height: 100px;
+            background-color: #4CAF50;
+            color: white;
+            line-height: 100px;
+            text-align: center;
+            position: absolute;
+            cursor: move;
+        }
+
+        #info {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+
+<body>
+    <section id="playground">
+        <div id="contenedor">
+            <div id="elemento" class="drag" draggable="true">Arrástrame</div>
+        </div>
+
+        <div id="info">
+            <p><strong>Posición y Tamaño del Elemento:</strong></p>
+            <p id="x">x: 0</p>
+            <p id="y">y: 0</p>
+            <p id="width">Ancho: 100</p>
+            <p id="height">Altura: 100</p>
+            <p id="top">Top: 0</p>
+            <p id="right">Right: 100</p>
+            <p id="bottom">Bottom: 100</p>
+            <p id="left">Left: 0</p>
+        </div>
+    </section>
+    <section id="explanation">
+        <h3>Explicación</h3>
+
+        <ol>
+            <li><strong>JavaScript</strong>:
+                <ul>
+                    <li><strong><code>dragstart</code></strong>: Se activa cuando el usuario empieza a arrastrar el
+                        elemento. Usamos <code>e.dataTransfer.setData()</code> para almacenar el ID del elemento.</li>
+                    <li><strong><code>dragend</code></strong>: Se activa cuando el arrastre termina. Cambiamos el color
+                        del elemento para restaurar su estado.</li>
+                    <li><strong><code>dragover</code></strong>: Se activa cuando el elemento arrastrado está sobre el
+                        contenedor. Llamamos a <code>e.preventDefault()</code> para permitir que el elemento sea soltado
+                        en el contenedor.</li>
+                    <li><strong><code>drop</code></strong>: Se activa cuando el elemento es soltado en el contenedor.
+                        Calculamos la posición donde el elemento debe ser colocado y actualizamos sus propiedades de
+                        estilo.</li>
+                </ul>
+            </li>
+        </ol>
+
+    </section>
+    <script>
+        const elemento = document.getElementById('elemento');
+        const contenedor = document.getElementById('contenedor');
+        const xElem = document.getElementById('x');
+        const yElem = document.getElementById('y');
+        const widthElem = document.getElementById('width');
+        const heightElem = document.getElementById('height');
+        const topElem = document.getElementById('top');
+        const rightElem = document.getElementById('right');
+        const bottomElem = document.getElementById('bottom');
+        const leftElem = document.getElementById('left');
+
+        function actualizarInformacion() {
+            const rect = elemento.getBoundingClientRect();
+            const contenedorRect = contenedor.getBoundingClientRect();
+
+            xElem.textContent = `x: ${rect.x}`;
+            yElem.textContent = `y: ${rect.y}`;
+            widthElem.textContent = `Ancho: ${rect.width}`;
+            heightElem.textContent = `Altura: ${rect.height}`;
+            topElem.textContent = `Top: ${rect.top - contenedorRect.top}`;
+            rightElem.textContent = `Right: ${rect.right - contenedorRect.left}`;
+            bottomElem.textContent = `Bottom: ${rect.bottom - contenedorRect.top}`;
+            leftElem.textContent = `Left: ${rect.left - contenedorRect.left}`;
+        }
+
+        // Actualizar información al cargar la página
+        actualizarInformacion();
+
+        elemento.addEventListener('dragstart', (e) => {
+            e.dataTransfer.setData('text/plain', e.target.id);
+            e.target.style.backgroundColor = '#2e7d32';
+        });
+
+        elemento.addEventListener('dragend', (e) => {
+            e.target.style.backgroundColor = '#4CAF50';
+            // Actualizar información cuando se termine de arrastrar
+            actualizarInformacion();
+        });
+
+        contenedor.addEventListener('dragover', (e) => {
+            e.preventDefault();
+        });
+
+        contenedor.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const id = e.dataTransfer.getData('text');
+            const draggableElement = document.getElementById(id);
+            const rect = contenedor.getBoundingClientRect();
+            const x = e.clientX - rect.left - (draggableElement.offsetWidth / 2);
+            const y = e.clientY - rect.top - (draggableElement.offsetHeight / 2);
+            draggableElement.style.position = 'absolute';
+            draggableElement.style.left = `${x}px`;
+            draggableElement.style.top = `${y}px`;
+            // Actualizar información después de soltar
+            actualizarInformacion();
+        });
+    </script>
+
+</body>
+
+</html>
